@@ -36,35 +36,35 @@ if user_topic and submit:
         )
         human_message = HumanMessage(content=user_topic)
         
-        title_response = llm.invoke([sys_prompt, human_message])  # Call LLM
-        title_text = title_response.content.strip()  # Ensure it's clean
+        title_response = llm.invoke([sys_prompt, human_message]) 
+        title_text = title_response.content.strip()  
         
-        # Extra filtering: Remove `<think>` parts if the LLM includes reasoning
+        
         if "<think>" in title_text:
             title_text = title_text.split("</think>")[-1].strip()
 
-        return {"messages": [AIMessage(content=title_text)]}  # Store cleaned title
+        return {"messages": [AIMessage(content=title_text)]} 
 
     def content_creator(state: State):
         """Generate blog content without any `<think>` or extra reasoning."""
-        title_message = state["messages"][-1]  # Get the last message (title)
-        title_text = title_message.content.strip()  # Extract and clean title
+        title_message = state["messages"][-1]  
+        title_text = title_message.content.strip()  
         
         sys_prompt = SystemMessage(
             content="You are a blog content creator. Generate high-quality, engaging blog content for the given title. "
                     "Do not include any **thoughts, explanations, or reasoning** in your response. "
                     "Your response must be **only the blog content**, nothing else."
         )
-        human_message = HumanMessage(content=title_text)  # Pass the correct title
+        human_message = HumanMessage(content=title_text)  
         
-        response = llm.invoke([sys_prompt, human_message])  # Call LLM
+        response = llm.invoke([sys_prompt, human_message])  
         content_text = response.content.strip()
 
-        # Extra filtering: Remove `<think>` parts if they appear
+       
         if "<think>" in content_text:
             content_text = content_text.split("</think>")[-1].strip()
 
-        return {"messages": [AIMessage(content=content_text)]}  # Store cleaned content
+        return {"messages": [AIMessage(content=content_text)]}  
 
     builder.add_node("title_maker", title_creator)
     builder.add_node("content_creator", content_creator)
@@ -74,10 +74,10 @@ if user_topic and submit:
     builder.add_edge("content_creator", END)
 
     graph = builder.compile()
-    messages = graph.invoke({"messages": []})  # Start with an empty message list
+    messages = graph.invoke({"messages": []})  
     
     st.subheader("Generated Blog Title:")
-    st.write(messages["messages"][0].content)  # Show the cleaned title
+    st.write(messages["messages"][0].content)  
     
     st.subheader("Generated Blog Content:")
-    st.write(messages["messages"][1].content)  # Show the cleaned blog content
+    st.write(messages["messages"][1].content)  
